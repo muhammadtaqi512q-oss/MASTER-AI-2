@@ -12,7 +12,7 @@
             height: 100%;
             overflow: hidden;
             background-color: #000000;
-            /* User-select bhi block karne ke liye */
+            /* Prevents text selection */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -31,83 +31,6 @@
     <iframe id="myFrame" src="about:blank" allowfullscreen></iframe>
 
     <script>
-        // ========== 1. Right Click (Context Menu) Block ==========
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            // alert('Right click is disabled.'); // optional message
-            return false;
-        });
-
-        // ========== 2. Keyboard Shortcuts Block ==========
-        document.addEventListener('keydown', function(e) {
-            // F12
-            if (e.key === 'F12') {
-                e.preventDefault();
-                return false;
-            }
-            // Ctrl+Shift+I / Ctrl+Shift+J (DevTools)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) {
-                e.preventDefault();
-                return false;
-            }
-            // Ctrl+U (View Source)
-            if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
-                e.preventDefault();
-                return false;
-            }
-            // Ctrl+S (Save)
-            if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
-                e.preventDefault();
-                return false;
-            }
-            // Ctrl+Shift+C (Inspect Element)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) {
-                e.preventDefault();
-                return false;
-            }
-            // Ctrl+Shift+K (Firefox DevTools)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        // ========== 3. DevTools Detection (via debugger) ==========
-        // Har 1 second mein check karega, agar DevTools open hua to page freeze jaisa lagega
-        setInterval(function() {
-            const start = performance.now();
-            debugger;
-            const end = performance.now();
-            if (end - start > 100) {
-                // Ho sakta hai DevTools open ho, page reload ya kuch aur action le sakte hain
-                // Yahaan hum sirf ek alert dikha rahe hain, aap customize kar sakte hain
-                // alert('Developer tools detected! Please close it.');
-                // Ya redirect: window.location.href = 'about:blank';
-            }
-        }, 1000);
-
-        // ========== 4. Agar koi specific "Write" button hai to usko bhi block kar sakte hain ==========
-        // Agar iframe ke andar ya current page mein koi button hai jiska id "writeBtn" hai, to use disable karein.
-        window.addEventListener('load', function() {
-            // Agar write button iframe ke andar hai, to iframe load ke baad access karna hoga.
-            // Is example mein hum maan rahe hain ki "page1.html" ke andar ek <button id="writeBtn">Write</button> hai.
-            const iframe = document.getElementById('myFrame');
-            iframe.onload = function() {
-                try {
-                    const writeBtn = iframe.contentWindow.document.getElementById('writeBtn');
-                    if (writeBtn) {
-                        writeBtn.disabled = true;
-                        writeBtn.style.pointerEvents = 'none';
-                        writeBtn.style.opacity = '0.5';
-                    }
-                } catch (e) {
-                    // Cross-origin iframes ko access nahi kar sakte, isiliye try-catch mein rakha hai
-                    console.warn('Iframe content access blocked:', e);
-                }
-            };
-        });
-
-        // ========== Original load target frame function ==========
         function loadTargetFrame() {
             const iframe = document.getElementById('myFrame');
             iframe.src = "page1.html";
@@ -115,7 +38,41 @@
 
         window.onload = function() {
             loadTargetFrame();
+            protectPage(window); // Protect parent page
         };
+
+        // Core protection function
+        function protectPage(win) {
+            // 1. Disable Right Click
+            win.document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            // 2. Disable Keyboard Shortcuts
+            win.document.addEventListener('keydown', function(e) {
+                // Disable F12
+                if (e.key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Disable Ctrl+U (View Source), Ctrl+S (Save), Ctrl+Shift+I / Ctrl+Shift+J (DevTools)
+                if (e.ctrlKey && (
+                    e.key === 'u' || e.key === 'U' || 
+                    e.key === 's' || e.key === 'S' || 
+                    e.shiftKey && (e.key === 'i' || e.key === 'I' || e.key === 'j' || e.key === 'J' || e.key === 'c' || e.key === 'C')
+                )) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Disable Cmd+Opt+I / Cmd+Opt+U for Mac users
+                if (e.metaKey && e.altKey && (e.key === 'i' || e.key === 'I' || e.key === 'u' || e.key === 'U')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
     </script>
 
 </body>
