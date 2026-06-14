@@ -1,11 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Get Code</title>
-
 <style>
 body{
     font-family: Arial, sans-serif;
@@ -17,13 +15,11 @@ body{
     height:100vh;
     margin:0;
 }
-
 .container{
     text-align:center;
     width:90%;
     max-width:1000px;
 }
-
 button{
     padding:15px 30px;
     font-size:18px;
@@ -33,11 +29,9 @@ button{
     border-radius:8px;
     cursor:pointer;
 }
-
 button:hover{
     background:#0088cc;
 }
-
 pre{
     display:none;
     margin-top:20px;
@@ -56,90 +50,79 @@ pre{
 <div class="container">
     <h1>Welcome</h1>
     <button onclick="showCode()">Get Code</button>
-
     <pre id="codeBox"></pre>
 </div>
 
 <script>
 const code = `<!DOCTYPE html>
 <html lang="en">
-<head>    
-    <meta charset="UTF-8">    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-    <title>Web 1 - Portal Loader</title>    
-    <style>        
-        html, body {            
-            margin: 0;            
-            padding: 0;            
-            width: 100%;            
-            height: 100%;            
-            overflow: hidden;            
-            background: #0a0f1d; /* Midnight Navy Background matches your system style */
-            color: #e2e8f0;
-        }        
-        iframe {            
-            width: 100%;            
-            height: 100%;            
-            border: none;            
-            display: none; /* Hidden until API verification succeeds */        
-        }        
-        .loading {            
-            display: flex;            
-            justify-content: center;            
-            align-items: center;            
-            height: 100%;            
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;            
-            font-size: 1.4rem;            
-            color: #d4af37; /* Royal Liquid Gold */
-            font-weight: bold;
-            letter-spacing: 1px;
-        }    
-    </style>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web 1 - Portal Loader</title>
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0f1d;
+    color: #e2e8f0;
+}
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: none;
+}
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.4rem;
+    color: #d4af37;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+</style>
 </head>
 <body>
 
-    <div id="loader" class="loading">Verifying API Key with CORE Ecosystem...</div>        
-    <iframe id="mainFrame" src=""></iframe>
+<div id="loader" class="loading">Verifying API Key with CORE Ecosystem...</div>
+<iframe id="mainFrame" src=""></iframe>
 
-    <script>        
-        // ==========================================
-        // 🛠️ --- USER CONFIGURATION SETTINGS ---
-        // ==========================================
-        const web2LiveURL = "ENTER-YOUR-MODEL";                
-        const userAPIKey  = "ENTER-YOUR-API-KEY";         
-        // ==========================================
+<script>
+const web2LiveURL = "ENTER-YOUR-MODEL";
+const userAPIKey = "ENTER-YOUR-API-KEY";
 
-        const loader = document.getElementById('loader');        
-        const mainFrame = document.getElementById('mainFrame');
+const loader = document.getElementById('loader');
+const mainFrame = document.getElementById('mainFrame');
 
-        // FIXED: Listener register first before appending the Frame to prevent missing cached handshakes
-        window.addEventListener('message', function(event) {            
-            // Clean GitHub Pages verification check
-            if (event.origin.startsWith("https://muhammadtaqi512q-oss.github.io")) {                
-                if (event.data && event.data.status === 'success') {                    
-                    loader.style.display = 'none'; // Stop loader                                        
-                    
-                    // Injecting the authorized web builder workspace URL
-                    mainFrame.src = event.data.url;                    
-                    mainFrame.style.display = 'block';                 
-                }            
-            }        
-        });
+window.addEventListener('message', function(event) {
+    if (event.origin.startsWith("https://muhammadtaqi512q-oss.github.io")) {
+        if (event.data && event.data.status === 'success') {
+            loader.style.display = 'none';
+            mainFrame.src = event.data.url;
+            mainFrame.style.display = 'block';
+        }
+    }
+});
 
-        // Background authentication tunnel deployment
-        const authFrame = document.createElement('iframe');        
-        authFrame.style.display = 'none';        
-        authFrame.src = `${web2LiveURL}?api=${userAPIKey}`;        
-        document.body.appendChild(authFrame);
-        
-        // Connection timeout handling (If wrong API Key is used)
-        setTimeout(() => {            
-            if (mainFrame.style.display !== 'block') {                
-                loader.textContent = "CRITICAL ERROR: Invalid API Key or Connection Timeout.";                
-                loader.style.color = "#ff4a4a";            
-            }        
-        }, 6000);    
-    <\/script>
+const authFrame = document.createElement('iframe');
+authFrame.style.display = 'none';
+authFrame.src = \`\${web2LiveURL}?api=\${userAPIKey}\`;
+document.body.appendChild(authFrame);
+
+setTimeout(() => {
+    if (mainFrame.style.display !== 'block') {
+        loader.textContent = "CRITICAL ERROR: Invalid API Key or Connection Timeout.";
+        loader.style.color = "#ff4a4a";
+    }
+}, 6000);
+<\/script>
 </body>
 </html>`;
 
