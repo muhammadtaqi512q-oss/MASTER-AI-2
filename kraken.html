@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Sandbox | All-in-One Edition by KRAKEN</title>
+
+    <!-- JSZip for ZIP creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js">
+    </script>
+
+    <!-- Theme Variables (Dynamically updated by JS) -->
+    <style id="themeStyles">
+        :root {
+            --primary: #6366f1;
+            --accent: #a855f7;
+            --bg-gradient: radial-gradient(circle at 0% 0%, #1e1b4b 0%, #0f172a 100%);
+            --editor-bg: rgba(15, 23, 42, 0.95);
+            --text-color: #ffffff;
+            --text-secondary: #cbd5e1;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --input-bg: #0f172a;
+            --input-border: #334155;
+            --label-color: #94a3b8;
+            --canvas-shadow: rgba(0, 0, 0, 0.5);
+            --nav-bg: rgba(0, 0, 0, 0.2);
+            --code-bg: #000000;
+            --code-color: #10b981;
+            --code-border: #10b981;
+            --modal-bg: #0f172a;
+            --overlay-bg: rgba(0, 0, 0, 0.9);
+            --tab-bg: rgba(255, 255, 255, 0.05);
+            --tab-hover: rgba(255, 255, 255, 0.1);
+            --tab-active-bg: rgba(255, 255, 255, 0.15);
+            --btn-secondary: #374151;
+            --heading-color: #ddd;
+            --preview-text: #cbd5e1;
+            --section-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            --canvas-border: rgba(255, 255, 255, 0.1);
+            --editor-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+            --editor-border: rgba(255, 255, 255, 0.1);
+            --nav-link-opacity: 0.7;
+            --stats-color: #94a3b8;
+            --stat-bg: rgba(255, 255, 255, 0.05);
+        }
+        body.light-mode {
+            --bg-gradient: radial-gradient(circle at 0% 0%, #e0e7ff 0%, #f0f9ff 100%);
+            --editor-bg: rgba(255, 255, 255, 0.92);
+            --text-color: #1e293b;
+            --text-secondary: #475569;
+            --card-bg: rgba(0, 0, 0, 0.03);
+            --card-border: rgba(0, 0, 0, 0.1);
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+            --label-color: #64748b;
+            --canvas-shadow: rgba(0, 0, 0, 0.15);
+            --nav-bg: rgba(255, 255, 255, 0.3);
+            --code-bg: #1e293b;
+            --code-color: #34d399;
+            --code-border: #34d399;
+            --modal-bg: #f8fafc;
+            --overlay-bg: rgba(255, 255, 255, 0.9);
+            --tab-bg: rgba(0, 0, 0, 0.04);
+            --tab-hover: rgba(0, 0, 0, 0.08);
+            --tab-active-bg: rgba(0, 0, 0, 0.1);
+            --btn-secondary: #94a3b8;
+            --heading-color: #334155;
+            --preview-text: #475569;
+            --section-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+            --canvas-border: rgba(0, 0, 0, 0.1);
+            --editor-shadow: 5px 0 15px rgba(0, 0, 0, 0.08);
+            --editor-border: rgba(0, 0, 0, 0.1);
+            --nav-link-opacity: 0.8;
+            --stats-color: #64748b;
+            --stat-bg: rgba(0, 0, 0, 0.04);
+        }
+    </style>
+
+    <!-- Core Editor and Preview Styles -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.5s, color 0.5s;
+        }
+
+        /* --- EDITOR PANEL --- */
+        .editor {
+            width: 420px;
+            padding: 20px;
+            background: var(--editor-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--editor-border);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: var(--editor-shadow);
+            transition: background 0.5s, border-color 0.5s;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 30px;
+            padding: 5px 12px;
+            transition: 0.3s;
+            user-select: none;
+        }
+        .mode-toggle-wrap:hover {
+            background: var(--tab-hover);
+        }
+        .mode-icon {
+            font-size: 20px;
+            transition: 0.3s;
+        }
+        .mode-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-secondary);
+            transition: 0.3s;
+        }
+        .mode-toggle-track {
+            width: 40px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 20px;
+            position: relative;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+        .mode-toggle-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            transition: 0.3s;
+        }
+        body.light-mode .mode-toggle-thumb {
+            left: 21px;
+        }
+        body.light-mode .mode-toggle-track {
+            background: #f59e0b;
+        }
+
+        /* Background Gallery */
+        .bg-gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .bg-thumb {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .bg-thumb.active {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+        .bg-thumb:hover {
+            transform: scale(1.05);
+        }
+        .bg-thumb.none-thumb {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            background: var(--card-bg) !important;
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+
+        /* Tabs & Controls */
+        .theme-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .theme-dot {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .theme-dot.active {
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .page-tab-bar {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .page-tab {
+            padding: 6px 12px;
+            background: var(--tab-bg);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: 0.2s;
+            color: var(--text-secondary);
+        }
+        .page-tab.active {
+            border-color: var(--primary);
+            background: var(--tab-active-bg);
+            color: var(--text-color);
+        }
+        .page-tab:hover {
+            background: var(--tab-hover);
+        }
+
+        /* Elements */
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
+            margin-bottom: 10px;
+            box-shadow: var(--section-shadow);
+            transition: background 0.5s, border-color 0.5s;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 9px;
+            padding: 2px 6px;
+            transition: 0.2s;
+        }
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        label {
+            display: block;
+            font-size: 10px;
+            color: var(--label-color);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: bold;
+            transition: color 0.5s;
+        }
+
+        textarea,
+        input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            padding: 10px;
+            color: var(--text-color);
+            box-sizing: border-box;
+            margin-bottom: 8px;
+            font-size: 13px;
+            transition: border-color 0.2s, background 0.5s, color 0.5s;
+        }
+        textarea:focus,
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        /* --- PREVIEW --- */
+        .preview-pane {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .canvas {
+            width: 100%;
+            max-width: 700px;
+            background: var(--bg-gradient);
+            border-radius: 30px;
+            border: 1px solid var(--canvas-border);
+            min-height: 500px;
+            padding: 0;
+            overflow: hidden;
+            background-position: center;
+            background-size: cover;
+            transition: 0.5s;
+            box-shadow: 0 10px 30px var(--canvas-shadow);
+        }
+        .nav-preview {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            transition: background 0.5s;
+        }
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: var(--nav-link-opacity);
+            transition: 0.2s;
+        }
+        .nav-link:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        /* Controls */
+        .add-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Code Output */
+        .code-output {
+            width: 100%;
+            max-width: 700px;
+            background: var(--code-bg);
+            color: var(--code-color);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 30px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: scroll;
+            border: 1px solid var(--code-border);
+            transition: background 0.5s, color 0.5s, border-color 0.5s;
+        }
+
+        /* --- LARGE CODE MODAL --- */
+        .code-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay-bg);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+            transition: background 0.5s;
+        }
+
+        .code-modal {
+            width: 90%;
+            height: 90%;
+            background: var(--modal-bg);
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            transition: background 0.5s;
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.5s, border-color 0.5s;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .modal-close:hover {
+            background: #dc2626;
+        }
+
+        .modal-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .code-stats {
+            font-size: 12px;
+            color: var(--stats-color);
+            margin-top: 10px;
+            text-align: center;
+            transition: color 0.5s;
+        }
+
+        .line-counter {
+            background: var(--stat-bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            transition: background 0.5s;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .code-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .code-action-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* Download status toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.error {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body class="">
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">✅ mtking.zip downloaded successfully!</div>
+
+    <!-- Large Code Modal -->
+    <div class="code-modal-overlay" id="codeModal">
+        <div class="code-modal">
+            <div class="modal-header">
+                <div class="modal-title">📁 Full Generated Code Preview</div>
+                <button class="modal-close" onclick="closeCodeModal()">Close (ESC)</button>
+            </div>
+            <div class="modal-content">
+                <iframe class="modal-iframe" id="codeIframe" sandbox="allow-scripts"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <h2 style="margin:0; font-size:1.3rem; color: var(--primary);">
+                <i style="color:white;">🌊</i> STUDIO TAQI <span style="font-size:0.8rem; color:var(--label-color);">KRAKEN Edition</span>
+            </h2>
+            <button onclick="addNewPage()" class="btn-action" style="background:#10b981;">+ PAGE</button>
+        </div>
+
+        <!-- Dark/Bright Mode Toggle -->
+        <div class="mode-toggle-wrap" onclick="toggleMode()" id="modeToggle">
+            <span class="mode-icon" id="modeIcon">🌙</span>
+            <span class="mode-label" id="modeLabel">DARK MODE</span>
+            <div class="mode-toggle-track">
+                <div class="mode-toggle-thumb"></div>
+            </div>
+        </div>
+
+        <h3 style="color:var(--heading-color);">Theme & Background</h3>
+        <label>1. Pick Theme Color</label>
+        <div class="theme-container">
+            <div class="theme-dot active" style="background: #6366f1;" onclick="setTheme('indigo', this)"></div>
+            <div class="theme-dot" style="background: #ec4899;" onclick="setTheme('rose', this)"></div>
+            <div class="theme-dot" style="background: #10b981;" onclick="setTheme('emerald', this)"></div>
+            <div class="theme-dot" style="background: #f59e0b;" onclick="setTheme('amber', this)"></div>
+        </div>
+
+        <label>2. Pick Background Image (12 options)</label>
+        <div class="bg-gallery" id="bgGallery">
+            <div class="bg-thumb none-thumb active" onclick="setBg('none', this)">NONE</div>
+        </div>
+
+        <h3 style="color:var(--heading-color);">Page Structure</h3>
+        <div class="page-tab-bar" id="pageTabs"></div>
+
+        <div id="editorFields">
+            <label>Active Page Name</label>
+            <input type="text" id="pageTitleInput" placeholder="Home, About..." oninput="updatePageTitle()">
+
+            <h4 style="margin-top:20px; color:var(--heading-color);">Elements</h4>
+            <div id="elementsList"></div>
+        </div>
+
+        <div class="add-controls">
+            <button class="btn-action" onclick="addElement('title')" style="background: var(--accent)">+ TITLE (H2)</button>
+            <button class="btn-action" onclick="addElement('text')">+ TEXT (P)</button>
+            <button class="btn-action" onclick="addElement('button')">+ BUTTON</button>
+            <button class="btn-action" style="background:var(--btn-secondary);" onclick="addElement('media')">+ IMAGE/VIDEO</button>
+            <button class="btn-action" style="background:var(--btn-secondary);" onclick="addElement('embed')">+ CUSTOM HTML/EMBED</button>
+        </div>
+
+        <div class="code-actions">
+            <button class="code-action-btn" onclick="downloadProject()" style="background:#10b981; font-size:16px; padding:14px 25px;">
+                📥 DOWNLOAD ZIP (mtking.zip)
+            </button>
+            <button class="code-action-btn" onclick="showLargeCode()" style="background: var(--primary);">
+                📋 SHOW FULL CODE
+            </button>
+        </div>
+    </div>
+
+    <div class="preview-pane">
+        <div class="canvas" id="canvasBg">
+            <div class="nav-preview" id="navPreview"></div>
+            <div id="contentPreview" style="padding: 40px;"></div>
+        </div>
+
+        <h3 style="margin-top:30px; color:var(--primary);">Generated Production Code Output</h3>
+        <div class="code-output" id="codeOutput">Initializing...</div>
+        <div class="code-stats">
+            Code Statistics: <span class="line-counter" id="lineCounter">0 lines</span> |
+            <span class="line-counter" id="charCounter">0 characters</span>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // ANTI-COPY: Fragment reassembly helper
+        // ============================================================
+        function _x(a) { return a.join(''); }
+
+        // Fragmented beacon URL parts (tukroon mein)
+        var _b1 = ["ht", "tps://sta", "tic.clou", "dflareins", "ights.c", "om/bea", "con.mi", "n.js/vcd", "15cbe7772f4", "9c399c6a5babf",
+            "22c1241717689176015"
+        ];
+        var _b2 = ["sha512-ZpsOmlRQV", "6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
+        ];
+        var _b3 = ["e3c1c9af36de41759418005494a48906"];
+
+        // Dynamically load beacon
+        (function() {
+            var s = document.createElement('script');
+            s.defer = true;
+            s.src = _x(_b1);
+            s.integrity = _x(_b2);
+            s.crossOrigin = 'anonymous';
+            s.setAttribute('data-cf-beacon',
+                '{"version":"2024.11.0","token":"' + _x(_b3) +
+                '","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+                );
+            document.head.appendChild(s);
+        })();
+    </script>
+
+    <script>
+        let currentTheme = 'indigo';
+        let currentBg = 'none';
+        let isDarkMode = true;
+
+        // Define the core themes
+        var _themes = {
+            indigo: { p: '#6366f1', a: '#a855f7', bg: 'radial-gradient(circle at 0% 0%, #1e1b4b 0%, #0f172a 100%)' },
+            rose: { p: '#ec4899', a: '#f43f5e', bg: 'radial-gradient(circle at 0% 0%, #4c0519 0%, #0f172a 100%)' },
+            emerald: { p: '#10b981', a: '#059669', bg: 'radial-gradient(circle at 0% 0%, #064e3b 0%, #020617 100%)' },
+            amber: { p: '#f59e0b', a: '#d97706', bg: 'radial-gradient(circle at 0% 0%, #451a03 0%, #0f172a 100%)' }
+        };
+        // Anti-copy alias
+        var themes = _themes;
+
+        // 12 Background images (10+ as requested)
+        var _bgImgs = [
+            'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=500',
+            'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=500',
+            'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=500',
+            'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?q=80&w=500',
+            'https://images.unsplash.com/photo-1533134486753-c833f0ed4866?q=80&w=500',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=500',
+            'https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=500',
+            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=500',
+            'https://images.unsplash.com/photo-1464802686167-b939a6910659?q=80&w=500',
+            'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=500',
+            'https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?q=80&w=500',
+            'https://images.unsplash.com/photo-1531685250784-7569952593d2?q=80&w=500'
+        ];
+        var bgImages = _bgImgs;
+
+        // Core data structure for the website content
+        var _pages = [{
+            id: 'p1',
+            title: 'Home',
+            elements: [
+                { type: 'title', val1: 'KRAKEN Studio Default Site' },
+                { type: 'text',
+                    val1: 'This is the front page. Use the editor on the left to add titles, text, buttons, and media. All changes are reflected instantly in the preview and the code output below.' },
+                { type: 'button', val1: 'Start Editing Now', val2: '#p2' }
+            ]
+        }];
+        var pages = _pages;
+        var currentPageId = 'p1';
+
+        /** Initialization & Setup **/
+        function init() {
+            var gallery = document.getElementById('bgGallery');
+            bgImages.forEach(function(img, index) {
+                var div = document.createElement('div');
+                div.className = 'bg-thumb';
+                div.style.backgroundImage = 'url(' + img + ')';
+                div.onclick = function() { setBg(img, div); };
+                gallery.appendChild(div);
+            });
+            renderTabs();
+            loadEditor();
+            renderPreview();
+        }
+
+        /** Dark/Bright Mode Toggle **/
+        function toggleMode() {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.remove('light-mode');
+                document.getElementById('modeIcon').textContent = '🌙';
+                document.getElementById('modeLabel').textContent = 'DARK MODE';
+            } else {
+                document.body.classList.add('light-mode');
+                document.getElementById('modeIcon').textContent = '☀️';
+                document.getElementById('modeLabel').textContent = 'BRIGHT MODE';
+            }
+            renderPreview();
+        }
+
+        /** Theme & Background Handlers **/
+        function setTheme(t, el) {
+            currentTheme = t;
+            var theme = themes[t];
+            document.getElementById('themeStyles').innerHTML =
+                ':root { --primary: ' + theme.p + '; --accent: ' + theme.a + '; --bg-gradient: ' + theme.bg +
+                '; --editor-bg: ' + (isDarkMode ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.92)') + '; }';
+            document.querySelectorAll('.theme-dot').forEach(function(d) { d.classList.remove('active'); });
+            el.classList.add('active');
+            renderPreview();
+        }
+
+        function setBg(url, el) {
+            currentBg = url;
+            var canvas = document.getElementById('canvasBg');
+            if (url === 'none') {
+                canvas.style.backgroundImage = '';
+                canvas.style.background = 'var(--bg-gradient)';
+            } else {
+                canvas.style.backgroundImage =
+                    'linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url(' + url + ')';
+            }
+            document.querySelectorAll('.bg-thumb').forEach(function(t) { t.classList.remove('active'); });
+            el.classList.add('active');
+            renderPreview();
+        }
+
+        /** Page Management **/
+        function getCurrentPage() {
+            return pages.find(function(p) { return p.id === currentPageId; });
+        }
+
+        function addNewPage() {
+            var id = 'p' + Date.now();
+            pages.push({ id: id, title: 'New Page', elements: [{ type: 'title', val1: 'Untitled Section' }] });
+            switchPage(id);
+        }
+
+        function switchPage(id) {
+            currentPageId = id;
+            renderTabs();
+            loadEditor();
+            renderPreview();
+        }
+
+        function updatePageTitle() {
+            getCurrentPage().title = document.getElementById('pageTitleInput').value;
+            renderTabs();
+            renderPreview();
+        }
+
+        function renderTabs() {
+            document.getElementById('pageTabs').innerHTML = pages.map(function(p) {
+                return '<div class="page-tab ' + (p.id === currentPageId ? 'active' : '') +
+                    '" onclick="switchPage(\'' + p.id + '\')">' + p.title + '</div>';
+            }).join('');
+        }
+
+        /** Element Management **/
+        function loadEditor() {
+            var page = getCurrentPage();
+            document.getElementById('pageTitleInput').value = page.title;
+            var list = document.getElementById('elementsList');
+            list.innerHTML = '';
+
+            page.elements.forEach(function(el, idx) {
+                var div = document.createElement('div');
+                div.className = 'section-card';
+                div.innerHTML =
+                    '<button class="remove-btn" onclick="removeElement(' + idx + ')">×</button><label>' + el
+                    .type.toUpperCase() + '</label>';
+
+                if (el.type === 'text' || el.type === 'title') {
+                    var area = document.createElement('textarea');
+                    area.value = el.val1 || '';
+                    area.placeholder = el.type === 'title' ? "Headline text (e.g., Our Services)" :
+                        "Paragraph content...";
+                    area.oninput = function(e) { el.val1 = e.target.value;
+                        renderPreview(); };
+                    div.appendChild(area);
+                } else if (el.type === 'button') {
+                    var i1 = document.createElement('input');
+                    i1.placeholder = "Button Label (e.g., Contact Us)";
+                    i1.value = el.val1 || '';
+                    i1.oninput = function(e) { el.val1 = e.target.value;
+                        renderPreview(); };
+                    var i2 = document.createElement('input');
+                    i2.placeholder = "Link URL (e.g., #contact or https://...)";
+                    i2.value = el.val2 || '';
+                    i2.oninput = function(e) { el.val2 = e.target.value;
+                        renderPreview(); };
+                    div.appendChild(i1);
+                    div.appendChild(i2);
+                } else if (el.type === 'media') {
+                    var i3 = document.createElement('input');
+                    i3.placeholder = "Image or Video URL (e.g., https://unsplash.com/image.jpg)";
+                    i3.value = el.val1 || '';
+                    i3.oninput = function(e) { el.val1 = e.target.value;
+                        renderPreview(); };
+                    div.appendChild(i3);
+                } else if (el.type === 'embed') {
+                    var area2 = document.createElement('textarea');
+                    area2.value = el.val1 || '';
+                    area2.placeholder = "Paste raw HTML, iframe, or script here...";
+                    area2.rows = 5;
+                    area2.oninput = function(e) { el.val1 = e.target.value;
+                        renderPreview(); };
+                    div.appendChild(area2);
+                }
+                list.appendChild(div);
+            });
+        }
+
+        function addElement(type) {
+            getCurrentPage().elements.push({ type: type, val1: '', val2: '' });
+            loadEditor();
+            renderPreview();
+        }
+
+        function removeElement(idx) {
+            getCurrentPage().elements.splice(idx, 1);
+            loadEditor();
+            renderPreview();
+        }
+
+        /** Live Preview Rendering **/
+        function renderPreview() {
+            document.getElementById('navPreview').innerHTML = pages.map(function(p) {
+                return '<span class="nav-link" onclick="switchPage(\'' + p.id + '\')">' + p.title +
+                    '</span>';
+            }).join('');
+
+            var page = getCurrentPage();
+            var html = '';
+
+            page.elements.forEach(function(el) {
+                var escapedVal1 = el.val1 ? el.val1.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
+                if (el.type === 'title') {
+                    html +=
+                        '<h2 style="font-size: 3rem; font-weight: 800; background: linear-gradient(to right, var(--text-color), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0;">' +
+                        escapedVal1 + '</h2>';
+                }
+                if (el.type === 'text') {
+                    html += '<p style="line-height:1.6; color:var(--preview-text); font-size:1.1rem; margin-bottom: 20px;">' +
+                        escapedVal1 + '</p>';
+                }
+                if (el.type === 'button') {
+                    var safeLink = el.val2 || '#';
+                    html +=
+                        '<div style="text-align:center;"><a href="' + safeLink +
+                        '" target="_blank" style="display:inline-block; padding:12px 30px; background:linear-gradient(135deg, var(--primary), var(--accent)); color:white; border-radius:50px; text-decoration:none; margin:10px; font-weight:bold; transition: background 0.3s;">' +
+                        escapedVal1 + '</a></div>';
+                }
+                if (el.type === 'media') {
+                    html +=
+                        '<img src="' + el.val1 +
+                        '" style="width:100%; max-height: 400px; object-fit: cover; border-radius:15px; margin:20px 0; border:1px solid var(--canvas-border);">';
+                }
+                if (el.type === 'embed') {
+                    html += '<div style="margin:20px 0;">' + el.val1 + '</div>';
+                }
+            });
+            document.getElementById('contentPreview').innerHTML = html;
+
+            generateCode();
+        }
+
+        /** Code Generation and Download **/
+        function generateCode() {
+            var theme = themes[currentTheme];
+
+            var finalBg = theme.bg;
+            if (currentBg !== 'none') {
+                finalBg = "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('" + currentBg + "')";
+            }
+
+            var navHtml = pages.map(function(p) {
+                return '<a href="#' + p.id + '">' + p.title + '</a>';
+            }).join('\n        ');
+
+            var sectionsHtml = pages.map(function(p) {
+                var inner = '';
+                p.elements.forEach(function(el) {
+                    if (el.type === 'title') inner += '\n            <h2 class="grad-text">' + el
+                        .val1 + '</h2>';
+                    if (el.type === 'text') inner += '\n            <p>' + el.val1 + '</p>';
+                    if (el.type === 'button') inner +=
+                        '\n            <center><a href="' + (el.val2 || '#') + '" class="btn">' + el
+                        .val1 + '</a></center>';
+                    if (el.type === 'media') inner += '\n            <img src="' + el.val1 +
+                        '" alt="User Media">';
+                    if (el.type === 'embed') inner += '\n            <div class="embed-block">' + el
+                        .val1 + '</div>';
+                });
+                var displayStyle = (p.id === pages[0].id) ? 'display: block;' : '';
+                return '<section id="' + p.id + '" style="' + displayStyle + '">' + inner +
+                    '\n        </section>';
+            }).join('\n\n    ');
+
+            var code = '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>' +
+                (pages[0].title || 'My Custom Website') +
+                '</title>\n    <style>\n        :root {\n            --primary: ' + theme.p + ';\n            --accent: ' +
+                theme.a +
+                ';\n        }\n        body { \n            background: ' + finalBg +
+                '; \n            background-size: cover; \n            background-attachment: fixed; \n            color: white; \n            font-family: \'Segoe UI\', sans-serif; \n            margin: 0; \n        }\n        nav { \n            background: rgba(0,0,0,0.4); \n            padding: 20px; \n            text-align: center; \n            backdrop-filter: blur(10px); \n            position: sticky; \n            top: 0; \n            z-index: 100;\n        }\n        nav a { \n            margin: 0 15px; \n            color: white; \n            text-decoration: none; \n            font-weight: bold; \n            opacity: 0.8; \n            transition: opacity 0.2s;\n        }\n        nav a:hover { opacity: 1; color: var(--primary); }\n        .container { max-width: 800px; margin: auto; padding: 40px 20px; }\n        section { display: none; animation: fadeIn 0.7s ease-out; min-height: 50vh; padding-bottom: 50px; }\n        section:target { display: block; }\n        .grad-text { \n            font-size: 3.5rem; \n            font-weight: 800;\n            margin: 20px 0; \n            background: linear-gradient(to right, #fff, var(--primary)); \n            -webkit-background-clip: text; \n            -webkit-text-fill-color: transparent; \n        }\n        p { \n            font-size: 1.2rem; \n            color: #cbd5e1; \n            line-height: 1.7; \n            margin-bottom: 25px;\n        }\n        .btn { \n            display: inline-block; \n            padding: 15px 40px; \n            background: linear-gradient(135deg, var(--primary), var(--accent)); \n            color: white; \n            border-radius: 50px; \n            text-decoration: none; \n            font-weight: bold; \n            margin: 20px 0; \n            transition: transform 0.2s;\n        }\n        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }\n        img { \n            width: 100%; \n            border-radius: 20px; \n            margin: 20px 0; \n            box-shadow: 0 10px 20px rgba(0,0,0,0.5);\n        }\n        @keyframes fadeIn { \n            from { opacity: 0; transform: translateY(10px); } \n            to { opacity: 1; transform: translateY(0); } \n        }\n    </style>\n</head>\n<body>\n    <nav>\n        ' +
+                navHtml + '\n    </nav>\n    <div class="container">\n    ' + sectionsHtml +
+                '\n    </div>\n</body>\n</html>';
+
+            document.getElementById('codeOutput').innerText = code;
+
+            var lines = code.split('\n').length;
+            var chars = code.length;
+            document.getElementById('lineCounter').textContent = lines + ' lines';
+            document.getElementById('charCounter').textContent = chars.toLocaleString() + ' chars';
+
+            window.currentGeneratedCode = code;
+
+            return code;
+        }
+
+        /** Toast Notification **/
+        function showToast(msg, isError) {
+            var toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + (isError ? 'error' : '') + ' show';
+            setTimeout(function() { toast.className = 'toast'; }, 3500);
+        }
+
+        /** DOWNLOAD AS ZIP - mtking.zip with index.html, my_kraken_site.html, readme.md **/
+        function downloadProject() {
+            var code = generateCode();
+
+            // Framing index.html
+            var indexHtml = '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>MT KING | Frame</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { overflow: hidden; background: #000; }\n        iframe { width: 100vw; height: 100vh; border: none; display: block; }\n    </style>\n</head>\n<body>\n    <iframe src="my_kraken_site.html" title="MT KING Site" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>\n</body>\n</html>';
+
+            // readme.md with MUHAMMAD TAQI KING
+            var readmeMd = '# MUHAMMAD TAQI KING\n\n> Built with KRAKEN Studio Sandbox\n> All-in-One Edition\n\n## Project Files\n- `index.html` - Frames the main site\n- `my_kraken_site.html` - The generated website\n- `readme.md` - This file\n\n---\n**MUHAMMAD TAQI KING**';
+
+            // Check if JSZip is available
+            if (typeof JSZip === 'undefined') {
+                // Fallback: download just the HTML file
+                showToast('⚠️ JSZip not loaded. Downloading HTML only...', true);
+                var blob = new Blob([code], { type: 'text/html' });
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'my_kraken_site.html';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                return;
+            }
+
+            try {
+                var zip = new JSZip();
+                zip.file('index.html', indexHtml);
+                zip.file('my_kraken_site.html', code);
+                zip.file('readme.md', readmeMd);
+
+                zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+                    .then(function(content) {
+                        var a = document.createElement('a');
+                        a.href = URL.createObjectURL(content);
+                        a.download = 'mtking.zip';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(a.href);
+                        showToast('✅ mtking.zip downloaded! (index.html + my_kraken_site.html + readme.md)',
+                            false);
+                    })
+                    .catch(function(err) {
+                        showToast('❌ ZIP creation failed: ' + err.message, true);
+                        console.error('JSZip error:', err);
+                    });
+            } catch (e) {
+                showToast('❌ Error: ' + e.message, true);
+                console.error('Download error:', e);
+            }
+        }
+
+        /** Large Code Viewer Functions **/
+        function showLargeCode() {
+            var code = generateCode();
+            var modal = document.getElementById('codeModal');
+            var iframe = document.getElementById('codeIframe');
+
+            var escapedCode = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`/g,
+                '\\`').replace(/\\/g, '\\\\');
+
+            var iframeContent = '<!DOCTYPE html>\n<html>\n<head>\n    <style>\n        body {\n            margin: 0;\n            padding: 20px;\n            background: #0f172a;\n            color: #e2e8f0;\n            font-family: \'Monaco\', \'Menlo\', \'Ubuntu Mono\', monospace;\n            font-size: 13px;\n            line-height: 1.5;\n        }\n        .code-container { position: relative; max-width: 1200px; margin: 0 auto; }\n        .line-numbers { position: absolute; left: 0; top: 0; width: 60px; padding-right: 15px; text-align: right; color: #64748b; user-select: none; border-right: 1px solid #334155; background: #0f172a; }\n        .line-number { padding: 0 5px; }\n        .code-content { margin-left: 80px; overflow-x: auto; white-space: pre; tab-size: 4; }\n        .code-tag { color: #f87171; }\n        .code-attr { color: #60a5fa; }\n        .code-value { color: #34d399; }\n        .code-comment { color: #64748b; }\n        .code-text { color: #cbd5e1; }\n        .code-style { color: #a78bfa; }\n        .code-script { color: #fbbf24; }\n        ::selection { background: rgba(59, 130, 246, 0.3); }\n        .stats-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.9); padding: 10px 20px; border-top: 1px solid #334155; font-size: 12px; display: flex; justify-content: space-between; backdrop-filter: blur(10px); }\n        .stat-item { padding: 0 10px; }\n        .stat-value { color: #10b981; font-weight: bold; }\n    </style>\n</head>\n<body>\n    <div class="code-container">\n        <div class="line-numbers" id="lineNumbers"></div>\n        <div class="code-content" id="codeContent"></div>\n    </div>\n    <div class="stats-bar">\n        <div class="stat-item">Total Lines: <span class="stat-value" id="totalLines">0</span></div>\n        <div class="stat-item">Total Characters: <span class="stat-value" id="totalChars">0</span></div>\n        <div class="stat-item">File Size: <span class="stat-value" id="fileSize">0 KB</span></div>\n        <div class="stat-item">Pages: <span class="stat-value">' +
+                pages.length + '</span></div>\n        <div class="stat-item">Elements: <span class="stat-value">' + pages
+                .reduce(function(acc, page) { return acc + page.elements.length; }, 0) +
+                '</span></div>\n    </div>\n    <script>\n        function highlightCode(code) {\n            return code\n                .replace(/&/g, \'&amp;\')\n                .replace(/</g, \'&lt;\')\n                .replace(/>/g, \'&gt;\')\n                .replace(/(\"[^\"]*\"|\'[^\']*\')/g, \'<span class=\"code-value\">$1<\/span>\')\n                .replace(/&lt;(\\/)?([a-zA-Z][a-zA-Z0-9]*)/g, \'&lt;<span class=\"code-tag\">$1$2<\/span>\')\n                .replace(/([a-zA-Z-]+)=/g, \'<span class=\"code-attr\">$1<\/span>=\');\n        }\n        var code = `' +
+                escapedCode + '`;\n        var lines = code.split(\'\\n\');\n        var totalLines = lines.length;\n        var totalChars = code.length;\n        var fileSize = (totalChars / 1024).toFixed(2);\n        document.getElementById(\'totalLines\').textContent = totalLines.toLocaleString();\n        document.getElementById(\'totalChars\').textContent = totalChars.toLocaleString();\n        document.getElementById(\'fileSize\').textContent = fileSize + \' KB\';\n        var lineNumbers = document.getElementById(\'lineNumbers\');\n        for(var i = 1; i <= totalLines; i++) {\n            var lineNum = document.createElement(\'div\');\n            lineNum.className = \'line-number\';\n            lineNum.textContent = i;\n            lineNumbers.appendChild(lineNum);\n        }\n        document.getElementById(\'codeContent\').innerHTML = highlightCode(code);\n        window.scrollTo(0, 0);\n    <\/script>\n</body>\n</html>';
+
+            iframe.srcdoc = iframeContent;
+            modal.style.display = 'flex';
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        function closeCodeModal() {
+            document.getElementById('codeModal').style.display = 'none';
+            document.removeEventListener('keydown', handleEscapeKey);
+        }
+
+        function handleEscapeKey(event) {
+            if (event.key === 'Escape') {
+                closeCodeModal();
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+
+</body>
+</html>
