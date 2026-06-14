@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lumina Studio | Light Mode Website Builder</title>
+    <!-- Theme Variables (Light Mode Base) -->
+    <style id="themeStyles">
+        :root {
+            --primary: #4f46e5;
+            --accent: #8b5cf6;
+            --bg-gradient: linear-gradient(145deg, #f8fafc 0%, #eff6ff 100%);
+            --surface-light: rgba(255, 255, 255, 0.96);
+            --surface-card: rgba(255, 255, 255, 0.92);
+            --border-light: rgba(0, 0, 0, 0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+    <!-- Core Styles (Light Mode Redesign) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* EDITOR PANEL - Light Glassmorphism */
+        .editor {
+            width: 440px;
+            padding: 28px 24px;
+            background: var(--surface-light);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border-light);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 6px 0 24px rgba(0, 0, 0, 0.03);
+            border-radius: 0 32px 32px 0;
+            transition: background 0.3s ease;
+        }
+
+        .editor h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor h2 i {
+            font-style: normal;
+            font-size: 1.6rem;
+            color: var(--primary);
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: var(--primary);
+        }
+
+        .editor h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin: 10px 0 6px 0;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Background Gallery - Light */
+        .bg-gallery {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .bg-thumb {
+            aspect-ratio: 1;
+            border-radius: 16px;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid transparent;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            color: #475569;
+            background-color: #f1f5f9;
+        }
+
+        .bg-thumb.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            transform: scale(1.05);
+            color: var(--primary);
+        }
+
+        /* Theme Dots */
+        .theme-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .theme-dot {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        .theme-dot.active {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Page Tabs */
+        .page-tab-bar {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .page-tab {
+            padding: 8px 20px;
+            background: #f1f5f9;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: 0.2s;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .page-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .page-tab:hover:not(.active) {
+            background: #e2e8f0;
+        }
+
+        /* Section Cards (Light) */
+        .section-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 18px 18px 22px 18px;
+            position: relative;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+
+        .section-card label {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 12px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        /* Inputs & Textareas Light */
+        textarea, input {
+            width: 100%;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px 16px;
+            color: #0f172a;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        textarea:focus, input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: #ffffff;
+        }
+
+        /* Preview Pane - Light Canvas */
+        .preview-pane {
+            flex-grow: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f1f5f9;
+        }
+
+        .canvas {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 32px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            min-height: 540px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-preview {
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #eef2ff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px 8px;
+            border-radius: 30px;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background: #f1f5f9;
+        }
+
+        #contentPreview {
+            padding: 40px 48px;
+            flex-grow: 1;
+            background: white;
+            color: var(--text-primary);
+        }
+
+        #contentPreview h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 8px 0 24px 0;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        #contentPreview p {
+            line-height: 1.6;
+            color: #334155;
+            margin-bottom: 28px;
+            font-size: 1rem;
+        }
+
+        #contentPreview a {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            border-radius: 60px;
+            padding: 12px 36px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #contentPreview a:hover {
+            transform: translateY(-2px);
+            background: var(--accent);
+            box-shadow: 0 12px 22px rgba(79, 70, 229, 0.25);
+        }
+
+        #contentPreview img {
+            max-width: 100%;
+            border-radius: 24px;
+            margin: 20px 0;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
+        }
+
+        /* Code Output (Light) */
+        .code-output {
+            width: 100%;
+            max-width: 900px;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 20px 26px;
+            border-radius: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            margin-top: 40px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .code-stats {
+            font-size: 12px;
+            color: #475569;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .line-counter {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-weight: 600;
+            margin: 0 6px;
+        }
+
+        /* Modal Light */
+        .code-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 30px;
+        }
+
+        .code-modal {
+            width: 90%;
+            height: 90%;
+            background: white;
+            border-radius: 32px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            padding: 20px 28px;
+            background: #ffffff;
+            border-bottom: 1px solid #eef2ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 22px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #ffffff;
+        }
+
+        .add-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .code-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        small {
+            color: #475569;
+        }
+    </style>
+    <!-- JSZip for creating the backend ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<!-- Large Code Modal (Light) -->
+<div class="code-modal-overlay" id="codeModal">
+    <div class="code-modal">
+        <div class="modal-header">
+            <div class="modal-title">✨ Full Generated Code (Light Edition)</div>
+            <button class="modal-close" onclick="closeCodeModal()">Close ⎋</button>
+        </div>
+        <div class="modal-content">
+            <iframe class="modal-iframe" id="codeIframe" sandbox="allow-same-origin allow-scripts"></iframe>
+        </div>
+    </div>
+</div>
+
+<div class="editor">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2><i>☀️</i> Lumina Studio <span style="font-size:0.7rem; background: #eef2ff; padding: 4px 10px; border-radius: 40px; color: #4f46e5;">Light Mode</span></h2>
+        <button class="btn-action" onclick="addNewPage()" style="background:#10b981;">+ New Page</button>
+    </div>
+
+    <h3>🎨 Theme & Background</h3>
+    <div class="theme-container" id="themeSelector">
+        <div class="theme-dot active" style="background: #4f46e5;" onclick="setTheme('indigo', this)"></div>
+        <div class="theme-dot" style="background: #db2777;" onclick="setTheme('rose', this)"></div>
+        <div class="theme-dot" style="background: #059669;" onclick="setTheme('emerald', this)"></div>
+        <div class="theme-dot" style="background: #d97706;" onclick="setTheme('amber', this)"></div>
+    </div>
+
+    <label>🖼️ Background Image (light overlay)</label>
+    <div class="bg-gallery" id="bgGallery"></div>
+
+    <h3>📄 Pages</h3>
+    <div class="page-tab-bar" id="pageTabs"></div>
+
+    <div id="editorFields">
+        <label for="pageTitleInput">Page name</label>
+        <input type="text" id="pageTitleInput" placeholder="Home, About..." oninput="updatePageTitle()" />
+        
+        <h4 style="margin: 18px 0 8px 0; color: var(--text-secondary);">🧩 Page Elements</h4>
+        <div id="elementsList"></div>
+    </div>
+
+    <div class="add-controls">
+        <button class="btn-action" onclick="addElement('title')" style="background: #6366f1;">+ Title</button>
+        <button class="btn-action" onclick="addElement('text')" style="background: #8b5cf6;">+ Text</button>
+        <button class="btn-action" onclick="addElement('button')" style="background: #f59e0b;">+ Button</button>
+        <button class="btn-action" style="background:#475569" onclick="addElement('media')">+ Image/Video</button>
+        <button class="btn-action" style="background:#475569" onclick="addElement('embed')">+ HTML Embed</button>
+    </div>
+
+    <div class="code-actions">
+        <button class="btn-action" onclick="downloadProject()" style="background: #0f172a;">📥 Download HTML</button>
+        <button class="btn-action" onclick="showLargeCode()" style="background: var(--primary);">📄 Show Full Code</button>
+        <!-- NEW BUTTON: Download Backend (ZIP) -->
+        <button class="btn-action" onclick="downloadBackendZip()" style="background: #1e293b;">📦 Download Backend (ZIP)</button>
+    </div>
+</div>
+
+<div class="preview-pane">
+    <div class="canvas" id="canvasBg">
+        <nav class="nav-preview" id="navPreview"></nav>
+        <div id="contentPreview"></div>
+    </div>
+
+    <h3 style="margin-top: 30px; color: var(--primary);">💻 Live Generated Code</h3>
+    <pre class="code-output" id="codeOutput">✨ Building your light-mode website...</pre>
+    <div class="code-stats">
+        📊 Stats: <span class="line-counter" id="lineCounter">0 lines</span> ·
+        <span class="line-counter" id="charCounter">0 chars</span>
+    </div>
+</div>
+
+<script>
+    // ---------- LIGHT MODE THEMES (white background based) ----------
+    const themes = {
+        indigo: { p: '#4f46e5', a: '#8b5cf6', bg: 'linear-gradient(145deg, #f8fafc, #eef2ff)' },
+        rose: { p: '#db2777', a: '#f43f5e', bg: 'linear-gradient(145deg, #fff5f6, #fff0f3)' },
+        emerald: { p: '#059669', a: '#10b981', bg: 'linear-gradient(145deg, #ecfdf5, #d1fae5)' },
+        amber: { p: '#d97706', a: '#f59e0b', bg: 'linear-gradient(145deg, #fffbeb, #fef3c7)' }
+    };
+
+    let currentTheme = 'indigo';
+    let currentBg = 'none';
+
+    // Background images gallery (5 images)
+    const bgImages = [
+        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500',
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=500',
+        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=500',
+        'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500',
+        'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=500'
+    ];
+
+    // ----- Pages Data (renamed, light mode friendly)
+    let pages = [{
+        id: 'p1',
+        title: 'Home',
+        elements: [
+            { type: 'title', val1: 'Lumina Studio — Light & Airy' },
+            { type: 'text', val1: 'Build modern websites with a clean white mode interface. Add dynamic pages, images, buttons, and custom HTML. Everything updates live.' },
+            { type: 'button', val1: 'Get Started', val2: '#p2' }
+        ]
+    }];
+    let currentPageId = 'p1';
+
+    // Helper
+    function getCurrentPage() { return pages.find(p => p.id === currentPageId); }
+
+    // THEME setter (light mode refresh)
+    function setTheme(t, el) {
+        currentTheme = t;
+        const theme = themes[t];
+        document.getElementById('themeStyles').innerHTML = `:root { --primary: ${theme.p}; --accent: ${theme.a}; --bg-gradient: ${theme.bg}; }`;
+        document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+        el.classList.add('active');
+        if (currentBg === 'none') {
+            document.getElementById('canvasBg').style.background = theme.bg;
+            document.getElementById('canvasBg').style.backgroundImage = '';
+        } else {
+            applyBgImage(currentBg);
+        }
+        renderPreview();
+    }
+
+    // Background logic with light overlay (semi-transparent white for readability)
+    function applyBgImage(url) {
+        const canvas = document.getElementById('canvasBg');
+        if (url === 'none') {
+            canvas.style.backgroundImage = '';
+            canvas.style.background = themes[currentTheme].bg;
+        } else {
+            canvas.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 245, 0.85)), url(${url})`;
+            canvas.style.backgroundSize = 'cover';
+            canvas.style.backgroundPosition = 'center';
+        }
+    }
+
+    function setBg(url, el) {
+        currentBg = url;
+        applyBgImage(url);
+        document.querySelectorAll('.bg-thumb').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        renderPreview();
+    }
+
+    // Page Management
+    function addNewPage() {
+        const id = 'p' + Date.now();
+        pages.push({ id: id, title: 'New Page', elements: [{ type: 'title', val1: 'Fresh Canvas' }] });
+        switchPage(id);
+    }
+
+    function switchPage(id) {
+        currentPageId = id;
+        renderTabs();
+        loadEditor();
+        renderPreview();
+    }
+
+    function updatePageTitle() {
+        const page = getCurrentPage();
+        page.title = document.getElementById('pageTitleInput').value || 'Untitled';
+        renderTabs();
+        renderPreview();
+    }
+
+    function renderTabs() {
+        const container = document.getElementById('pageTabs');
+        container.innerHTML = '';
+        pages.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'page-tab' + (p.id === currentPageId ? ' active' : '');
+            div.textContent = p.title;
+            div.onclick = () => switchPage(p.id);
+            container.appendChild(div);
+        });
+    }
+
+    // Elements CRUD
+    function loadEditor() {
+        const page = getCurrentPage();
+        document.getElementById('pageTitleInput').value = page.title;
+        const list = document.getElementById('elementsList');
+        list.innerHTML = '';
+        page.elements.forEach((el, idx) => {
+            const card = document.createElement('div');
+            card.className = 'section-card';
+            card.innerHTML = `<button class="remove-btn" onclick="removeElement(${idx})">✕ Remove</button><label>${el.type.toUpperCase()}</label>`;
+            if (el.type === 'text' || el.type === 'title') {
+                const area = document.createElement('textarea');
+                area.value = el.val1 || '';
+                area.placeholder = el.type === 'title' ? "Headline text" : "Paragraph content...";
+                area.rows = 3;
+                area.oninput = e => { el.val1 = e.target.value; renderPreview(); };
+                card.appendChild(area);
+            } else if (el.type === 'button') {
+                const labelInput = document.createElement('input');
+                labelInput.placeholder = "Button label";
+                labelInput.value = el.val1 || '';
+                labelInput.oninput = e => { el.val1 = e.target.value; renderPreview(); };
+                const linkInput = document.createElement('input');
+                linkInput.placeholder = "Link (https:// or #)";
+                linkInput.value = el.val2 || '';
+                linkInput.oninput = e => { el.val2 = e.target.value; renderPreview(); };
+                card.appendChild(labelInput);
+                card.appendChild(linkInput);
+            } else if (el.type === 'media') {
+                const urlInput = document.createElement('input');
+                urlInput.placeholder = "Image URL (jpg, png, or video embed)";
+                urlInput.value = el.val1 || '';
+                urlInput.oninput = e => { el.val1 = e.target.value; renderPreview(); };
+                card.appendChild(urlInput);
+            } else if (el.type === 'embed') {
+                const embedArea = document.createElement('textarea');
+                embedArea.value = el.val1 || '';
+                embedArea.placeholder = "Paste custom HTML / embed code...";
+                embedArea.rows = 4;
+                embedArea.oninput = e => { el.val1 = e.target.value; renderPreview(); };
+                card.appendChild(embedArea);
+            }
+            list.appendChild(card);
+        });
+    }
+
+    function addElement(type) {
+        getCurrentPage().elements.push({ type: type, val1: '', val2: '' });
+        loadEditor();
+        renderPreview();
+    }
+
+    function removeElement(idx) {
+        getCurrentPage().elements.splice(idx, 1);
+        loadEditor();
+        renderPreview();
+    }
+
+    // Preview Render
+    function renderPreview() {
+        const navContainer = document.getElementById('navPreview');
+        navContainer.innerHTML = '';
+        pages.forEach(p => {
+            const linkSpan = document.createElement('span');
+            linkSpan.className = 'nav-link';
+            linkSpan.textContent = p.title;
+            linkSpan.onclick = () => switchPage(p.id);
+            navContainer.appendChild(linkSpan);
+        });
+        const page = getCurrentPage();
+        let innerHtml = '';
+        page.elements.forEach(el => {
+            const safeVal1 = el.val1 ? el.val1.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+            if (el.type === 'title') innerHtml += `<h2>${safeVal1}</h2>`;
+            if (el.type === 'text') innerHtml += `<p>${safeVal1}</p>`;
+            if (el.type === 'button') {
+                const href = el.val2 || '#';
+                innerHtml += `<div style="margin:24px 0;"><a href="${href}" target="_blank">${safeVal1 || 'Button'}</a></div>`;
+            }
+            if (el.type === 'media' && el.val1) innerHtml += `<img src="${el.val1}" alt="media content" loading="lazy">`;
+            if (el.type === 'embed') innerHtml += `<div class="custom-embed">${el.val1}</div>`;
+        });
+        document.getElementById('contentPreview').innerHTML = innerHtml;
+        generateCode();
+    }
+
+    // Generate Full Light Mode HTML Output
+    function generateCode() {
+        const theme = themes[currentTheme];
+        let finalBgCss = theme.bg;
+        if (currentBg !== 'none') {
+            finalBgCss = `linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 245, 0.9)), url('${currentBg}')`;
+        }
+        let navLinks = pages.map(p => `<a href="#${p.id}">${p.title}</a>`).join('\n        ');
+        let sectionsHtml = pages.map(p => {
+            let secInner = '';
+            p.elements.forEach(el => {
+                if (el.type === 'title') secInner += `<h2 class="grad-title">${el.val1 || ''}</h2>`;
+                if (el.type === 'text') secInner += `<p>${el.val1 || ''}</p>`;
+                if (el.type === 'button') secInner += `<div class="btn-wrap"><a href="${el.val2 || '#'}" class="btn-light">${el.val1 || 'Click'}</a></div>`;
+                if (el.type === 'media') secInner += `<img src="${el.val1 || ''}" alt="user content" style="max-width:100%; border-radius:20px;">`;
+                if (el.type === 'embed') secInner += `<div>${el.val1 || ''}</div>`;
+            });
+            return `<section id="${p.id}" style="display: ${p.id === pages[0].id ? 'block' : 'none'};">${secInner}</section>`;
+        }).join('\n\n');
+        const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lumina Studio | Light Site</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:${finalBgCss};background-attachment:fixed;font-family:'Inter',system-ui;color:#0f172a;line-height:1.5;}
+    nav{background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);padding:18px;text-align:center;position:sticky;top:0;border-bottom:1px solid #eef2ff;}
+    nav a{margin:0 18px;text-decoration:none;font-weight:600;color:#334155;transition:0.2s;}
+    nav a:hover{color:${theme.p};}
+    .container{max-width:900px;margin:auto;padding:40px 28px;}
+    section{display:none;animation:fadeIn 0.3s ease;padding-bottom:30px;}
+    section:target{display:block;}
+    .grad-title{font-size:2.8rem;font-weight:800;margin:20px 0;background:linear-gradient(135deg, ${theme.p}, ${theme.a});-webkit-background-clip:text;background-clip:text;color:transparent;}
+    p{color:#334155;font-size:1rem;margin-bottom:24px;line-height:1.6;}
+    .btn-light{display:inline-block;background:${theme.p};color:white;padding:12px 32px;border-radius:60px;text-decoration:none;font-weight:700;margin:16px 0;transition:0.2s;}
+    .btn-light:hover{transform:translateY(-2px);background:${theme.a};}
+    img{border-radius:24px;margin:20px 0;max-width:100%;box-shadow:0 6px 14px rgba(0,0,0,0.05);}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+</style>
+</head>
+<body>
+<nav>${navLinks}</nav>
+<div class="container">${sectionsHtml}</div>
+</body>
+</html>`;
+        document.getElementById('codeOutput').textContent = fullHtml;
+        const lines = fullHtml.split('\n').length;
+        const chars = fullHtml.length;
+        document.getElementById('lineCounter').innerHTML = `${lines} lines`;
+        document.getElementById('charCounter').innerHTML = `${chars.toLocaleString()} chars`;
+        window.currentGeneratedCode = fullHtml;
+        return fullHtml;
+    }
+
+    // Modal + Download
+    function showLargeCode() {
+        const code = generateCode();
+        const iframe = document.getElementById('codeIframe');
+        const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        iframe.srcdoc = `<!DOCTYPE html><html><head><style>body{background:#fff;color:#0f172a;padding:24px;font-family:monospace;white-space:pre-wrap;}</style></head><body><pre>${escaped}</pre></body></html>`;
+        document.getElementById('codeModal').style.display = 'flex';
+        document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeCodeModal(); });
+    }
+    function closeCodeModal() { document.getElementById('codeModal').style.display = 'none'; }
+    function downloadProject() {
+        const code = generateCode();
+        const blob = new Blob([code], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'lumina_light_site.html';
+        a.click();
+    }
+
+    // ---------- NEW: Download Backend as ZIP (mt.zip) ----------
+    function downloadBackendZip() {
+        const siteCode = generateCode();   // the full lumina_light_site.html content
+
+        // index.html that frames lumina_light_site.html in a full‑page iframe
+        const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Light Site</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <iframe src="lumina_light_site.html"></iframe>
+</body>
+</html>`;
+
+        const readmeMd = `# Lumina Studio Light Website
+This project was generated using **Lumina Studio Light Mode**.
+
+- **lumina_light_site.html** – the complete website code (light theme)
+- **index.html** – a wrapper that frames the site in a full‑browser iframe
+- **README.md** – this file
+
+## How to use
+Open \`index.html\` in any modern browser to preview your website.
+`;
+
+        // Create a new JSZip instance and add the three files
+        const zip = new JSZip();
+        zip.file("lumina_light_site.html", siteCode);
+        zip.file("index.html", indexHtml);
+        zip.file("README.md", readmeMd);
+
+        // Generate the ZIP as a Blob and trigger download
+        zip.generateAsync({ type: "blob" })
+            .then(function (content) {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                a.download = "mt.zip";
+                a.click();
+            });
+    }
+
+    // Initialize Background gallery & default light theme
+    function init() {
+        const gallery = document.getElementById('bgGallery');
+        bgImages.forEach(img => {
+            const thumb = document.createElement('div');
+            thumb.className = 'bg-thumb';
+            thumb.style.backgroundImage = `url(${img})`;
+            thumb.onclick = () => setBg(img, thumb);
+            gallery.appendChild(thumb);
+        });
+        const noneThumb = document.querySelector('.bg-thumb');
+        if(noneThumb) noneThumb.classList.add('active');
+        setTheme('indigo', document.querySelector('.theme-dot.active'));
+        renderTabs();
+        loadEditor();
+        renderPreview();
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
